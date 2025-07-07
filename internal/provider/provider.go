@@ -70,6 +70,7 @@ type unboundProviderModel struct {
 
 // Configure prepares a unbound SSH client for data sources and resources.
 func (p *unboundProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+  tflog.Info(ctx, "Configuring Unbound SSH client")
   // Retrieve provider data from configuration
   var config unboundProviderModel
   diags := req.Config.Get(ctx, &config)
@@ -168,6 +169,13 @@ func (p *unboundProvider) Configure(ctx context.Context, req provider.ConfigureR
     return
   }
 
+  ctx = tflog.SetField(ctx, "unbound_host", host)
+  ctx = tflog.SetField(ctx, "unbound_username", username)
+  ctx = tflog.SetField(ctx, "unbound_private_key_path", private_key_path)
+
+  tflog.Debug(ctx, "Creating Unbound SSH client")
+
+
   // Create a new ssh client using the configuration values
   client, err := ssh.NewSSHClient(host, username, private_key_path)
   if err != nil {
@@ -184,6 +192,8 @@ func (p *unboundProvider) Configure(ctx context.Context, req provider.ConfigureR
   // type Configure methods.
   resp.DataSourceData = client
   resp.ResourceData = client
+
+  tflog.Info(ctx, "Configured Unbound SSH client", map[string]any{"success": true})
 }
 
 // DataSources defines the data sources implemented in the provider.
