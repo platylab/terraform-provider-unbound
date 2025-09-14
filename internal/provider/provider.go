@@ -143,6 +143,7 @@ func (p *unboundProvider) Configure(ctx context.Context, req provider.ConfigureR
 func (p *unboundProvider) DataSources(_ context.Context) []func() datasource.DataSource {
   return []func() datasource.DataSource {
     NewLocalZoneDataSource,
+    NewLocalDataDataSource,
   }
 }
 
