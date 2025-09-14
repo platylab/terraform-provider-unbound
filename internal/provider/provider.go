@@ -12,8 +12,9 @@ import (
   "github.com/hashicorp/terraform-plugin-framework/provider/schema"
   "github.com/hashicorp/terraform-plugin-framework/resource"
   "github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 
-  "github.com/platylab/terraform-provider-unbound/internal/ssh"
+  "github.com/platylab/terraform-provider-unbound/internal/unboundapiclient"
 )
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -51,12 +52,6 @@ func (p *unboundProvider) Schema(_ context.Context, _ provider.SchemaRequest, re
       "host": schema.StringAttribute{
         Optional: true,
       },
-      "username": schema.StringAttribute{
-        Optional: true,
-      },
-      "private_key_path": schema.StringAttribute{
-        Optional:  true,
-      },
     },
   }
 }
@@ -64,13 +59,11 @@ func (p *unboundProvider) Schema(_ context.Context, _ provider.SchemaRequest, re
 // unboundProviderModel maps provider schema data to a Go type.
 type unboundProviderModel struct {
   Host           types.String `tfsdk:"host"`
-  Username       types.String `tfsdk:"username"`
-  PrivateKeyPath types.String `tfsdk:"private_key_path"`
 }
 
-// Configure prepares a unbound SSH client for data sources and resources.
+// Configure prepares a unbound API client for data sources and resources.
 func (p *unboundProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-  tflog.Info(ctx, "Configuring Unbound SSH client")
+  tflog.Info(ctx, "Configuring Unbound API client")
   // Retrieve provider data from configuration
   var config unboundProviderModel
   diags := req.Config.Get(ctx, &config)
@@ -86,26 +79,8 @@ func (p *unboundProvider) Configure(ctx context.Context, req provider.ConfigureR
     resp.Diagnostics.AddAttributeError(
       path.Root("host"),
       "Unknown unbound Host",
-      "The provider cannot create the unbound SSH client as there is an unknown configuration value for the unbound SSH host. "+
+      "The provider cannot create the unbound API client as there is an unknown configuration value for the unbound API host. "+
         "Either target apply the source of the value first, set the value statically in the configuration, or use the UNBOUND_HOST environment variable.",
-    )
-  }
-
-  if config.Username.IsUnknown() {
-    resp.Diagnostics.AddAttributeError(
-      path.Root("username"),
-      "Unknown unbound SSH Username",
-      "The provider cannot create the unbound SSH client as there is an unknown configuration value for the unbound SSH username. "+
-        "Either target apply the source of the value first, set the value statically in the configuration, or use the UNBOUND_USERNAME environment variable.",
-    )
-  }
-
-  if config.PrivateKeyPath.IsUnknown() {
-    resp.Diagnostics.AddAttributeError(
-      path.Root("private_key_path"),
-      "Unknown unbound SSH Private Key",
-      "The provider cannot create the unbound SSH client as there is an unknown configuration value for the unbound SSH private key. "+
-        "Either target apply the source of the value first, set the value statically in the configuration, or use the UNBOUND_PRIVATE_KEY_PATH environment variable.",
     )
   }
 
@@ -117,19 +92,9 @@ func (p *unboundProvider) Configure(ctx context.Context, req provider.ConfigureR
   // with Terraform configuration value if set.
 
   host := os.Getenv("UNBOUND_HOST")
-  username := os.Getenv("UNBOUND_USERNAME")
-  private_key_path := os.Getenv("UNBOUND_PRIVATE_KEY_PATH")
 
   if !config.Host.IsNull() {
     host = config.Host.ValueString()
-  }
-
-  if !config.Username.IsNull() {
-    username = config.Username.ValueString()
-  }
-
-  if !config.PrivateKeyPath.IsNull() {
-    private_key_path = config.PrivateKeyPath.ValueString()
   }
 
   // If any of the expected configurations are missing, return
@@ -138,29 +103,9 @@ func (p *unboundProvider) Configure(ctx context.Context, req provider.ConfigureR
   if host == "" {
     resp.Diagnostics.AddAttributeError(
       path.Root("host"),
-      "Missing unbound SSH Host",
-      "The provider cannot create the unbound SSH client as there is a missing or empty value for the unbound SSH host. "+
+      "Missing unbound API Host",
+      "The provider cannot create the unbound API client as there is a missing or empty value for the unbound API host. "+
         "Set the host value in the configuration or use the UNBOUND_HOST environment variable. "+
-        "If either is already set, ensure the value is not empty.",
-    )
-  }
-
-  if username == "" {
-    resp.Diagnostics.AddAttributeError(
-      path.Root("username"),
-      "Missing unbound SSH Username",
-      "The provider cannot create the unbound SSH client as there is a missing or empty value for the unbound SSH username. "+
-        "Set the username value in the configuration or use the UNBOUND_USERNAME environment variable. "+
-        "If either is already set, ensure the value is not empty.",
-    )
-  }
-
-  if private_key_path == "" {
-    resp.Diagnostics.AddAttributeError(
-      path.Root("private_key_path"),
-      "Missing unbound SSH Private Key",
-      "The provider cannot create the unbound SSH client as there is a missing or empty value for the unbound SSH Private Key. "+
-        "Set the password value in the configuration or use the UNBOUND_PRIVATE_KEY_PATH environment variable. "+
         "If either is already set, ensure the value is not empty.",
     )
   }
@@ -170,18 +115,16 @@ func (p *unboundProvider) Configure(ctx context.Context, req provider.ConfigureR
   }
 
   ctx = tflog.SetField(ctx, "unbound_host", host)
-  ctx = tflog.SetField(ctx, "unbound_username", username)
-  ctx = tflog.SetField(ctx, "unbound_private_key_path", private_key_path)
 
-  tflog.Debug(ctx, "Creating Unbound SSH client")
+  tflog.Debug(ctx, "Creating Unbound API client")
 
 
-  // Create a new ssh client using the configuration values
-  client, err := ssh.NewSSHClient(host, username, private_key_path)
+  // Create a new API client using the configuration values
+  client, err := unboundapiclient.NewClient(host)
   if err != nil {
     resp.Diagnostics.AddError(
-      "Unable to Create unbound SSH Client",
-      "An unexpected error occurred when creating the unbound SSH client. "+
+      "Unable to Create unbound API Client",
+      "An unexpected error occurred when creating the unbound API client. "+
         "If the error is not clear, please contact the provider developers.\n\n"+
         "unbound Client Error: "+err.Error(),
     )
@@ -193,13 +136,12 @@ func (p *unboundProvider) Configure(ctx context.Context, req provider.ConfigureR
   resp.DataSourceData = client
   resp.ResourceData = client
 
-  tflog.Info(ctx, "Configured Unbound SSH client", map[string]any{"success": true})
+  tflog.Info(ctx, "Configured Unbound API client", map[string]any{"success": true})
 }
 
 // DataSources defines the data sources implemented in the provider.
 func (p *unboundProvider) DataSources(_ context.Context) []func() datasource.DataSource {
   return []func() datasource.DataSource {
-    NewLocalZoneDataSource,
   }
 }
 

@@ -4,12 +4,11 @@ package provider
 import (
   "context"
   "fmt"
-
   "github.com/hashicorp/terraform-plugin-framework/datasource"
   "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
   "github.com/hashicorp/terraform-plugin-framework/types"
 
-  "github.com/platylab/terraform-provider-unbound/internal/ssh"
+  "github.com/platylab/terraform-provider-unbound/internal/unboundapiclient"
 )
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -25,7 +24,7 @@ func NewLocalZoneDataSource() datasource.DataSource {
 
 // local_zoneDataSource is the data source implementation.
 type local_zoneDataSource struct {
-  client *ssh.SSHClient
+  client *unboundapiclient.Client
 }
 
 // Metadata returns the data source type name.
@@ -41,11 +40,11 @@ func (d *local_zoneDataSource) Configure(_ context.Context, req datasource.Confi
     return
   }
 
-  client, ok := req.ProviderData.(*ssh.SSHClient)
+  client, ok := req.ProviderData.(*unboundapiclient.Client)
   if !ok {
     resp.Diagnostics.AddError(
       "Unexpected Data Source Configure Type",
-      fmt.Sprintf("Expected *ssh.SSHClient, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+      fmt.Sprintf("Expected *unboundapiclient.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
     )
 
     return
@@ -56,6 +55,7 @@ func (d *local_zoneDataSource) Configure(_ context.Context, req datasource.Confi
 
 // local_zoneDataSourceModel maps the data source schema data.
 type local_zoneDataSourceModel struct {
+  Id     types.Int64    `tfsdk:"id"`
   Name   types.String   `tfsdk:"name"`
   Type   types.String   `tfsdk:"type"`
 }
@@ -67,9 +67,13 @@ func (d *local_zoneDataSource) Schema(_ context.Context, _ datasource.SchemaRequ
     MarkdownDescription: "Configured local-zone data source",
 
     Attributes: map[string]schema.Attribute{
+      "id": schema.Int64Attribute{
+        MarkdownDescription: "ID of the zone",
+        Required:            true,
+      },
       "name": schema.StringAttribute{
         MarkdownDescription: "Name of the zone",
-        Required:            true,
+        Computed:            true,
       },
       "type": schema.StringAttribute{
         MarkdownDescription: "Type of the zone",
@@ -90,12 +94,10 @@ func (d *local_zoneDataSource) Read(ctx context.Context, req datasource.ReadRequ
     return
   }
   
-  // Prepare arguments for the script execution
-  args := make(map[string]string)
-  args["name"] = state.Name.ValueString()
+  // Arguments for the API call
+	valueId := int(state.Id.ValueInt64())
   
-  // Execute the script endpoint with dynamic arguments
-  responseMap, err := d.client.ExecuteEndpoint("get-local-zone", args)
+  localzone, err := d.client.GetLocalZone(ctx, valueId)
   if err != nil {
     resp.Diagnostics.AddError(
       "Unable to Get Local-Zone",
@@ -103,10 +105,12 @@ func (d *local_zoneDataSource) Read(ctx context.Context, req datasource.ReadRequ
     )
     return
   }
-  
+
+
   // Set state values based on parsed response
-  state.Name = types.StringValue(responseMap["name"].(string))
-  state.Type = types.StringValue(responseMap["type"].(string))
+  state.Id   = types.Int64Value(int64(localzone.Id))
+  state.Name = types.StringValue(localzone.Name)
+  state.Type = types.StringValue(localzone.Type)
   
   // Set the state
   diags = resp.State.Set(ctx, state)
@@ -114,4 +118,5 @@ func (d *local_zoneDataSource) Read(ctx context.Context, req datasource.ReadRequ
   if resp.Diagnostics.HasError() {
     return
   }
+
 }

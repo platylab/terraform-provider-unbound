@@ -1,0 +1,199 @@
+openapi: 3.0.0
+info:
+  title: Unbound API
+  version: 1.0.0
+  description: API for managing Unbound configurations through CRUD operations.
+servers:
+  - url: "{host}"
+    description: The production API server
+    variables:
+      host:
+        default: http://127.0.0.1:8080
+
+paths:
+  /config/{clause}/{attribute}/{value_id}:
+    get:
+      summary: Retrieve configuration data
+      description: Reads configuration values based on the provided clause, attribute, and ID.
+      parameters:
+        - name: clause
+          in: path
+          required: true
+          description: The clause in the configuration file (e.g., server).
+          schema:
+            type: string
+        - name: attribute
+          in: path
+          required: true
+          description: The attribute within the clause to read.
+          schema:
+            type: string
+        - name: value_id
+          in: path
+          required: true
+          description: The ID of the value to retrieve. Use `*` for all values.
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: object
+                  status:
+                    type: integer
+                    example: 200
+        404:
+          description: Not Found - Unsupported clause, attribute, or ID
+
+    post:
+      summary: Create a new configuration value
+      description: Creates a new value for the specified clause and attribute.
+      parameters:
+        - name: clause
+          in: path
+          required: true
+          description: The clause in the configuration file (e.g., server).
+          schema:
+            type: string
+        - name: attribute
+          in: path
+          required: true
+          description: The attribute within the clause to modify.
+          schema:
+            type: string
+        - name: value_id
+          in: path
+          required: true
+          description: The ID for the new value. Use `*` for no specific ID.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  type: string
+      responses:
+        201:
+          description: Value successfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: object
+                  status:
+                    type: integer
+                    example: 201
+        400:
+          description: Bad Request - Missing or invalid input
+        409:
+          description: Conflict - Duplicate ID
+
+    put:
+      summary: Update an existing configuration value
+      description: Updates an existing value for the specified clause, attribute, and ID.
+      parameters:
+        - name: clause
+          in: path
+          required: true
+          description: The clause in the configuration file (e.g., server).
+          schema:
+            type: string
+        - name: attribute
+          in: path
+          required: true
+          description: The attribute within the clause to update.
+          schema:
+            type: string
+        - name: value_id
+          in: path
+          required: true
+          description: The ID of the value to update.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  type: string
+      responses:
+        200:
+          description: Value successfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: object
+                  status:
+                    type: integer
+                    example: 200
+        400:
+          description: Bad Request - Missing or invalid input
+        404:
+          description: Not Found - Unsupported clause, attribute, or ID
+
+    delete:
+      summary: Delete a configuration value
+      description: Deletes a value matching the specified clause, attribute, and ID.
+      parameters:
+        - name: clause
+          in: path
+          required: true
+          description: The clause in the configuration file (e.g., server).
+          schema:
+            type: string
+        - name: attribute
+          in: path
+          required: true
+          description: The attribute within the clause to delete.
+          schema:
+            type: string
+        - name: value_id
+          in: path
+          required: true
+          description: The ID of the value to delete.
+          schema:
+            type: string
+      responses:
+        200:
+          description: Value successfully deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: object
+                  status:
+                    type: integer
+                    example: 200
+        404:
+          description: Not Found - Unsupported clause, attribute, or ID
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        reason:
+          type: string
+        status:
+          type: integer
