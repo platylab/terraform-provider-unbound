@@ -105,6 +105,9 @@ func (r *local_dataResource) Schema(_ context.Context, _ resource.SchemaRequest,
 
 // Create creates the resource and sets the initial Terraform state.
 func (r *local_dataResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	// Retrieve values from plan
 	var plan local_dataRessourceModel
 	diags := req.Plan.Get(ctx, &plan)
@@ -147,6 +150,9 @@ func (r *local_dataResource) Create(ctx context.Context, req resource.CreateRequ
 
 // Read refreshes the Terraform state with the latest data.
 func (r *local_dataResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	mutex.Lock()
+	defer mutex.Unlock()
+	
 	// Retrieve values from state
   var state local_dataRessourceModel
   diags := resp.State.Get(ctx, &state)
@@ -185,6 +191,9 @@ func (r *local_dataResource) Read(ctx context.Context, req resource.ReadRequest,
 
 // Update updates the resource and sets the updated Terraform state on success.
 func (r *local_dataResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	mutex.Lock()
+	defer mutex.Unlock()
+	
 	// Retrieve values from plan
 	var plan local_dataRessourceModel
 	diags := req.Plan.Get(ctx, &plan)
@@ -226,6 +235,9 @@ func (r *local_dataResource) Update(ctx context.Context, req resource.UpdateRequ
 
 // Delete deletes the resource and removes the Terraform state on success.
 func (r *local_dataResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	mutex.Lock()
+	defer mutex.Unlock()
+	
 	// Retrieve values from state
   var state local_dataRessourceModel
   diags := resp.State.Get(ctx, &state)

@@ -5,6 +5,7 @@ package provider
 import (
   "context"
   "os"
+  "sync"
 
   "github.com/hashicorp/terraform-plugin-framework/datasource"
   "github.com/hashicorp/terraform-plugin-framework/path"
@@ -21,6 +22,9 @@ import (
 var (
   _ provider.Provider = &unboundProvider{}
 )
+
+// Global Mutex
+var mutex sync.Mutex
 
 // New is a helper function to simplify provider server and testing implementation.
 func New(version string) func() provider.Provider {
