@@ -11,7 +11,7 @@ provider "unbound" {
 }
 
 data "unbound_local_zone" "example_com" {
-  id = 2
+  id = 1
 }
 
 
@@ -45,4 +45,10 @@ output "local_data_type" {
 
 output "local_data_value" {
   value = data.unbound_local_data.test_example_com.value
+}
+
+
+resource "unbound_local_zone" "example_eu" {
+  name = "example.eu."
+  type = "transparent"
 }
