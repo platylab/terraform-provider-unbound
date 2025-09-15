@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 import (
@@ -54,7 +52,8 @@ func (p *unboundProvider) Schema(_ context.Context, _ provider.SchemaRequest, re
   resp.Schema = schema.Schema{
     Attributes: map[string]schema.Attribute{
       "host": schema.StringAttribute{
-        Optional: true,
+        Description: "URI for Unbound API. May also be provided via UNBOUND_HOST environment variable.",
+        Required:    true,
       },
     },
   }
