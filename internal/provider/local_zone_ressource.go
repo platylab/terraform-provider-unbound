@@ -4,6 +4,7 @@ import (
   "context"
 	"fmt"
 	"time"
+	"github.com/hashicorp/terraform-plugin-framework/path"
   "github.com/hashicorp/terraform-plugin-framework/resource"
   "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -15,8 +16,10 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-  _ resource.Resource              = &local_zoneResource{}
-  _ resource.ResourceWithConfigure = &local_zoneResource{}
+  _ resource.Resource                = &local_zoneResource{}
+  _ resource.ResourceWithConfigure   = &local_zoneResource{}
+	_ resource.ResourceWithImportState = &local_zoneResource{}
+
 )
 
 // NewLocalZoneResource is a helper function to simplify the provider implementation.
@@ -236,4 +239,11 @@ func (r *local_zoneResource) Delete(ctx context.Context, req resource.DeleteRequ
     return
   }
 
+}
+
+
+// ImportState imports an existing ressource into the state
+func (r *local_zoneResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	// Retrieve import ID and save to id attribute
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
