@@ -151,6 +151,7 @@ func (p *unboundProvider) DataSources(_ context.Context) []func() datasource.Dat
 func (p *unboundProvider) Resources(_ context.Context) []func() resource.Resource {
   return []func() resource.Resource{
     NewLocalZoneResource,
+    NewLocalDataResource,
   }
 
 }
