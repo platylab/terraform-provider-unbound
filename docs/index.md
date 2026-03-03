@@ -13,7 +13,9 @@ This provider takes advantage of the [Python Unbound API](https://github.com/pla
 
 ```terraform
 provider "unbound" {
-  host = "https://plbnet-dns-eu01.adm.platylab.com:8091"
+  host     = "https://plbnet-dns-eu01.adm.platylab.com:8091"
+  username = "admin"
+  password = "changeme"
 }
 ```
 
@@ -23,3 +25,5 @@ provider "unbound" {
 ### Required
 
 - `host` (String) URI for Unbound API. May also be provided via UNBOUND_HOST environment variable.
+- `password` (String) Password of the user used to login to Unbound API. May also be provided via UNBOUND_PASSWORD environment variable.
+- `username` (String) Username of the user used to login to Unbound API. May also be provided via UNBOUND_USERNAME environment variable.

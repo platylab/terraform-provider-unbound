@@ -11,7 +11,7 @@ import (
 )
 
 // GetLocalData - Returns specific local data
-func (c *Client) GetLocalData(ctx context.Context, valueId int) (LocalData, error) {
+func (c *ClientWithResponses) GetLocalData(ctx context.Context, valueId int) (LocalData, error) {
 	// Parameters
 	clause := "server"
 	attribute := "local-data"
@@ -38,12 +38,12 @@ func (c *Client) GetLocalData(ctx context.Context, valueId int) (LocalData, erro
 	// Check the "status" field
 	status, ok := responseMap["status"].(float64) // JSON numbers are parsed as float64
 	if !ok || int(status) != 200 {
-    // Extract "error" and "reason" fields as strings with type assertions
-    errMessage, _ := responseMap["error"].(string)   // Use type assertion for error message
-    errReason, _ := responseMap["reason"].(string)   // Use type assertion for reason
+		// Extract "error" and "reason" fields as strings with type assertions
+		errMessage, _ := responseMap["error"].(string) // Use type assertion for error message
+		errReason, _ := responseMap["reason"].(string) // Use type assertion for reason
 
-    // Return a formatted error
-    return LocalData{}, fmt.Errorf("%s: %s", errMessage, errReason)
+		// Return a formatted error
+		return LocalData{}, fmt.Errorf("%s: %s", errMessage, errReason)
 	}
 
 	// Check for the "items" field
@@ -79,12 +79,12 @@ func (c *Client) GetLocalData(ctx context.Context, valueId int) (LocalData, erro
 
 			// Populate the LocalData struct
 			localData = LocalData{
-				Id:      id,
-				Domain:  strings.Trim(parts[0], `"`), // Remove surrounding `"`,
-				Type:    parts[2],
-				Value:   strings.Trim(parts[3], `"`),
+				Id:     id,
+				Domain: strings.Trim(parts[0], `"`), // Remove surrounding `"`,
+				Type:   parts[2],
+				Value:  strings.Trim(parts[3], `"`),
 			}
-			
+
 			return localData, nil
 		}
 	}
@@ -94,13 +94,12 @@ func (c *Client) GetLocalData(ctx context.Context, valueId int) (LocalData, erro
 
 }
 
-
 // CreateLocalData - Returns specific local data
-func (c *Client) CreateLocalData(ctx context.Context, body PostConfigClauseAttributeValueIdJSONRequestBody) (LocalData, error) {
+func (c *ClientWithResponses) CreateLocalData(ctx context.Context, body PostConfigClauseAttributeValueIdJSONRequestBody) (LocalData, error) {
 	// Parameters
-	clause    := "server"
+	clause := "server"
 	attribute := "local-data"
-	valueId   := "*"
+	valueId := "*"
 
 	// Perform a POST request
 	resp, err := c.PostConfigClauseAttributeValueId(ctx, clause, attribute, valueId, body)
@@ -124,12 +123,12 @@ func (c *Client) CreateLocalData(ctx context.Context, body PostConfigClauseAttri
 	// Check the "status" field
 	status, ok := responseMap["status"].(float64) // JSON numbers are parsed as float64
 	if !ok || int(status) != 201 {
-    // Extract "error" and "reason" fields as strings with type assertions
-    errMessage, _ := responseMap["error"].(string)   // Use type assertion for error message
-    errReason, _ := responseMap["reason"].(string)   // Use type assertion for reason
+		// Extract "error" and "reason" fields as strings with type assertions
+		errMessage, _ := responseMap["error"].(string) // Use type assertion for error message
+		errReason, _ := responseMap["reason"].(string) // Use type assertion for reason
 
-    // Return a formatted error
-    return LocalData{}, fmt.Errorf("%s: %s", errMessage, errReason)
+		// Return a formatted error
+		return LocalData{}, fmt.Errorf("%s: %s", errMessage, errReason)
 	}
 
 	// Check for the "items" field
@@ -165,12 +164,12 @@ func (c *Client) CreateLocalData(ctx context.Context, body PostConfigClauseAttri
 
 			// Populate the LocalData struct
 			localData = LocalData{
-				Id:      id,
-				Domain:  strings.Trim(parts[0], `"`), // Remove surrounding `"`,
-				Type:    parts[2],
-				Value:   strings.Trim(parts[3], `"`),
+				Id:     id,
+				Domain: strings.Trim(parts[0], `"`), // Remove surrounding `"`,
+				Type:   parts[2],
+				Value:  strings.Trim(parts[3], `"`),
 			}
-			
+
 			return localData, nil
 		}
 	}
@@ -180,11 +179,10 @@ func (c *Client) CreateLocalData(ctx context.Context, body PostConfigClauseAttri
 
 }
 
-
 // UpdateLocalData - Returns specific local data
-func (c *Client) UpdateLocalData(ctx context.Context, valueId int, body PutConfigClauseAttributeValueIdJSONRequestBody) (LocalData, error) {
+func (c *ClientWithResponses) UpdateLocalData(ctx context.Context, valueId int, body PutConfigClauseAttributeValueIdJSONRequestBody) (LocalData, error) {
 	// Parameters
-	clause    := "server"
+	clause := "server"
 	attribute := "local-data"
 
 	// Perform a PUT request
@@ -209,12 +207,12 @@ func (c *Client) UpdateLocalData(ctx context.Context, valueId int, body PutConfi
 	// Check the "status" field
 	status, ok := responseMap["status"].(float64) // JSON numbers are parsed as float64
 	if !ok || int(status) != 200 {
-    // Extract "error" and "reason" fields as strings with type assertions
-    errMessage, _ := responseMap["error"].(string)   // Use type assertion for error message
-    errReason, _ := responseMap["reason"].(string)   // Use type assertion for reason
+		// Extract "error" and "reason" fields as strings with type assertions
+		errMessage, _ := responseMap["error"].(string) // Use type assertion for error message
+		errReason, _ := responseMap["reason"].(string) // Use type assertion for reason
 
-    // Return a formatted error
-    return LocalData{}, fmt.Errorf("%s: %s", errMessage, errReason)
+		// Return a formatted error
+		return LocalData{}, fmt.Errorf("%s: %s", errMessage, errReason)
 	}
 
 	// Check for the "items" field
@@ -254,10 +252,10 @@ func (c *Client) UpdateLocalData(ctx context.Context, valueId int, body PutConfi
 
 			// Populate the LocalData struct
 			localData = LocalData{
-				Id:      id,
-				Domain:  strings.Trim(parts[0], `"`), // Remove surrounding `"`,
-				Type:    parts[2],
-				Value:   strings.Trim(parts[3], `"`),
+				Id:     id,
+				Domain: strings.Trim(parts[0], `"`), // Remove surrounding `"`,
+				Type:   parts[2],
+				Value:  strings.Trim(parts[3], `"`),
 			}
 
 			// Since we only need the first item, return immediately
@@ -270,11 +268,10 @@ func (c *Client) UpdateLocalData(ctx context.Context, valueId int, body PutConfi
 
 }
 
-
 // DeleteLocalData - Returns specific local data
-func (c *Client) DeleteLocalData(ctx context.Context, valueId int) (LocalData, error) {
+func (c *ClientWithResponses) DeleteLocalData(ctx context.Context, valueId int) (LocalData, error) {
 	// Parameters
-	clause    := "server"
+	clause := "server"
 	attribute := "local-data"
 
 	// Perform a DELETE request
@@ -299,12 +296,12 @@ func (c *Client) DeleteLocalData(ctx context.Context, valueId int) (LocalData, e
 	// Check the "status" field
 	status, ok := responseMap["status"].(float64) // JSON numbers are parsed as float64
 	if !ok || int(status) != 200 {
-    // Extract "error" and "reason" fields as strings with type assertions
-    errMessage, _ := responseMap["error"].(string)   // Use type assertion for error message
-    errReason, _ := responseMap["reason"].(string)   // Use type assertion for reason
+		// Extract "error" and "reason" fields as strings with type assertions
+		errMessage, _ := responseMap["error"].(string) // Use type assertion for error message
+		errReason, _ := responseMap["reason"].(string) // Use type assertion for reason
 
-    // Return a formatted error
-    return LocalData{}, fmt.Errorf("%s: %s", errMessage, errReason)
+		// Return a formatted error
+		return LocalData{}, fmt.Errorf("%s: %s", errMessage, errReason)
 	}
 
 	// Check for the "items" field
@@ -344,10 +341,10 @@ func (c *Client) DeleteLocalData(ctx context.Context, valueId int) (LocalData, e
 
 			// Populate the LocalData struct
 			localData = LocalData{
-				Id:      id,
-				Domain:  strings.Trim(parts[0], `"`), // Remove surrounding `"`,
-				Type:    parts[2],
-				Value:   strings.Trim(parts[3], `"`),
+				Id:     id,
+				Domain: strings.Trim(parts[0], `"`), // Remove surrounding `"`,
+				Type:   parts[2],
+				Value:  strings.Trim(parts[3], `"`),
 			}
 
 			// Since we only need the first item, return immediately
