@@ -57,6 +57,7 @@ func (d *local_dataDataSource) Configure(_ context.Context, req datasource.Confi
 type local_dataDataSourceModel struct {
 	Id     types.Int64  `tfsdk:"id"`
 	Domain types.String `tfsdk:"domain"`
+	Ttl    types.Int64  `tfsdk:"ttl"`
 	Type   types.String `tfsdk:"type"`
 	Value  types.String `tfsdk:"value"`
 }
@@ -74,6 +75,10 @@ func (d *local_dataDataSource) Schema(_ context.Context, _ datasource.SchemaRequ
 			},
 			"domain": schema.StringAttribute{
 				MarkdownDescription: "Domain of the entry",
+				Computed:            true,
+			},
+			"ttl": schema.Int64Attribute{
+				MarkdownDescription: "TTL of the entry",
 				Computed:            true,
 			},
 			"type": schema.StringAttribute{
@@ -113,6 +118,7 @@ func (d *local_dataDataSource) Read(ctx context.Context, req datasource.ReadRequ
 	// Set state values based on parsed response
 	state.Id = types.Int64Value(int64(localdata.Id))
 	state.Domain = types.StringValue(localdata.Domain)
+	state.Ttl = types.Int64Value(int64(localdata.Ttl))
 	state.Type = types.StringValue(localdata.Type)
 	state.Value = types.StringValue(localdata.Value)
 

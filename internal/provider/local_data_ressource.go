@@ -63,6 +63,7 @@ func (r *local_dataResource) Configure(_ context.Context, req resource.Configure
 type local_dataRessourceModel struct {
 	Id          types.Int64  `tfsdk:"id"`
 	Domain      types.String `tfsdk:"domain"`
+	Ttl         types.Int64  `tfsdk:"ttl"`
 	Type        types.String `tfsdk:"type"`
 	Value       types.String `tfsdk:"value"`
 	LastUpdated types.String `tfsdk:"last_updated"`
@@ -85,6 +86,11 @@ func (r *local_dataResource) Schema(_ context.Context, _ resource.SchemaRequest,
 			"domain": schema.StringAttribute{
 				MarkdownDescription: "Domain of the entry",
 				Required:            true,
+			},
+			"ttl": schema.Int64Attribute{
+				MarkdownDescription: "TTL of the entry. Defaults to the Unbound server parameter",
+				Optional:            true,
+				Computed:            true,
 			},
 			"type": schema.StringAttribute{
 				MarkdownDescription: "Type of the entry",
@@ -115,8 +121,15 @@ func (r *local_dataResource) Create(ctx context.Context, req resource.CreateRequ
 	}
 
 	// Arguments for the API call
-	body := unboundapiclient.PostConfigClauseAttributeValueIdJSONRequestBody{
-		Value: fmt.Sprintf("\"%s IN %s %s\"", plan.Domain.ValueString(), plan.Type.ValueString(), plan.Value.ValueString()),
+	var body unboundapiclient.PostConfigClauseAttributeValueIdJSONRequestBody
+	if plan.Ttl.ValueInt64() == 0 {
+		body = unboundapiclient.PostConfigClauseAttributeValueIdJSONRequestBody{
+			Value: fmt.Sprintf("\"%s IN %s %s\"", plan.Domain.ValueString(), plan.Type.ValueString(), plan.Value.ValueString()),
+		}
+	} else {
+		body = unboundapiclient.PostConfigClauseAttributeValueIdJSONRequestBody{
+			Value: fmt.Sprintf("\"%s %d IN %s %s\"", plan.Domain.ValueString(), plan.Ttl.ValueInt64(), plan.Type.ValueString(), plan.Value.ValueString()),
+		}
 	}
 
 	// Create new localdata
@@ -132,6 +145,7 @@ func (r *local_dataResource) Create(ctx context.Context, req resource.CreateRequ
 	// Map response body to schema and populate Computed attribute values
 	plan.Id = types.Int64Value(int64(localdata.Id))
 	plan.Domain = types.StringValue(localdata.Domain)
+	plan.Ttl = types.Int64Value(int64(localdata.Ttl))
 	plan.Type = types.StringValue(localdata.Type)
 	plan.Value = types.StringValue(localdata.Value)
 	plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
@@ -174,6 +188,7 @@ func (r *local_dataResource) Read(ctx context.Context, req resource.ReadRequest,
 	// Map response body to schema
 	state.Id = types.Int64Value(int64(localdata.Id))
 	state.Domain = types.StringValue(localdata.Domain)
+	state.Ttl = types.Int64Value(int64(localdata.Ttl))
 	state.Type = types.StringValue(localdata.Type)
 	state.Value = types.StringValue(localdata.Value)
 
@@ -201,8 +216,15 @@ func (r *local_dataResource) Update(ctx context.Context, req resource.UpdateRequ
 
 	// Arguments for the API call
 	valueId := int(plan.Id.ValueInt64())
-	body := unboundapiclient.PutConfigClauseAttributeValueIdJSONRequestBody{
-		Value: fmt.Sprintf("\"%s IN %s %s\"", plan.Domain.ValueString(), plan.Type.ValueString(), plan.Value.ValueString()),
+	var body unboundapiclient.PutConfigClauseAttributeValueIdJSONRequestBody
+	if plan.Ttl.ValueInt64() == 0 {
+		body = unboundapiclient.PutConfigClauseAttributeValueIdJSONRequestBody{
+			Value: fmt.Sprintf("\"%s IN %s %s\"", plan.Domain.ValueString(), plan.Type.ValueString(), plan.Value.ValueString()),
+		}
+	} else {
+		body = unboundapiclient.PutConfigClauseAttributeValueIdJSONRequestBody{
+			Value: fmt.Sprintf("\"%s %d IN %s %s\"", plan.Domain.ValueString(), plan.Ttl.ValueInt64(), plan.Type.ValueString(), plan.Value.ValueString()),
+		}
 	}
 
 	// Update existing localdata
@@ -218,6 +240,7 @@ func (r *local_dataResource) Update(ctx context.Context, req resource.UpdateRequ
 	// Map response body to schema and populate Computed attribute values
 	plan.Id = types.Int64Value(int64(localdata.Id))
 	plan.Domain = types.StringValue(localdata.Domain)
+	plan.Ttl = types.Int64Value(int64(localdata.Ttl))
 	plan.Type = types.StringValue(localdata.Type)
 	plan.Value = types.StringValue(localdata.Value)
 	plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))

@@ -70,19 +70,24 @@ func (c *ClientWithResponses) GetLocalData(ctx context.Context, valueId int) (Lo
 				continue
 			}
 
-			// Split the value into Domain, Type and Value
-			parts := strings.SplitN(valueStr, " ", 4) // Split by spaces in 4 parts
-			if len(parts) != 4 {
+			// Split the value into Domain, TTL, Type and Value
+			parts := strings.SplitN(valueStr, " ", 5) // Split by spaces
+			if len(parts) != 5 && len(parts) != 4 {
 				log.Printf("Failed to parse Entry for ID '%s'", key)
 				continue
+			}
+			var ttl int
+			if len(parts) == 5 {
+				ttl, err = strconv.Atoi(parts[1])
 			}
 
 			// Populate the LocalData struct
 			localData = LocalData{
 				Id:     id,
 				Domain: strings.Trim(parts[0], `"`), // Remove surrounding `"`,
-				Type:   parts[2],
-				Value:  strings.Trim(parts[3], `"`),
+				Ttl:    ttl,
+				Type:   parts[len(parts)-2],
+				Value:  strings.Trim(parts[len(parts)-1], `"`),
 			}
 
 			return localData, nil
@@ -155,19 +160,24 @@ func (c *ClientWithResponses) CreateLocalData(ctx context.Context, body PostConf
 				continue
 			}
 
-			// Split the value into Domain, Type and Value
-			parts := strings.SplitN(valueStr, " ", 4) // Split by spaces in 4 parts
-			if len(parts) != 4 {
+			// Split the value into Domain, TTL, Type and Value
+			parts := strings.SplitN(valueStr, " ", 5) // Split by spaces
+			if len(parts) != 5 && len(parts) != 4 {
 				log.Printf("Failed to parse Entry for ID '%s'", key)
 				continue
+			}
+			var ttl int
+			if len(parts) == 5 {
+				ttl, err = strconv.Atoi(parts[1])
 			}
 
 			// Populate the LocalData struct
 			localData = LocalData{
 				Id:     id,
 				Domain: strings.Trim(parts[0], `"`), // Remove surrounding `"`,
-				Type:   parts[2],
-				Value:  strings.Trim(parts[3], `"`),
+				Ttl:    ttl,
+				Type:   parts[len(parts)-2],
+				Value:  strings.Trim(parts[len(parts)-1], `"`),
 			}
 
 			return localData, nil
@@ -243,19 +253,24 @@ func (c *ClientWithResponses) UpdateLocalData(ctx context.Context, valueId int, 
 				return localData, fmt.Errorf("'new_value' field for item '%s' is not a valid string", key)
 			}
 
-			// Split the value into Domain, Type and Value
-			parts := strings.SplitN(valueStr, " ", 4) // Split by spaces in 4 parts
-			if len(parts) != 4 {
+			// Split the value into Domain, TTL, Type and Value
+			parts := strings.SplitN(valueStr, " ", 5) // Split by spaces
+			if len(parts) != 5 && len(parts) != 4 {
 				log.Printf("Failed to parse Entry for ID '%s'", key)
 				continue
+			}
+			var ttl int
+			if len(parts) == 5 {
+				ttl, err = strconv.Atoi(parts[1])
 			}
 
 			// Populate the LocalData struct
 			localData = LocalData{
 				Id:     id,
 				Domain: strings.Trim(parts[0], `"`), // Remove surrounding `"`,
-				Type:   parts[2],
-				Value:  strings.Trim(parts[3], `"`),
+				Ttl:    ttl,
+				Type:   parts[len(parts)-2],
+				Value:  strings.Trim(parts[len(parts)-1], `"`),
 			}
 
 			// Since we only need the first item, return immediately
@@ -332,19 +347,24 @@ func (c *ClientWithResponses) DeleteLocalData(ctx context.Context, valueId int) 
 				return localData, fmt.Errorf("'old_value' field for item '%s' is not a valid string", key)
 			}
 
-			// Split the value into Domain, Type and Value
-			parts := strings.SplitN(valueStr, " ", 4) // Split by spaces in 4 parts
-			if len(parts) != 4 {
+			// Split the value into Domain, TTL, Type and Value
+			parts := strings.SplitN(valueStr, " ", 5) // Split by spaces
+			if len(parts) != 5 && len(parts) != 4 {
 				log.Printf("Failed to parse Entry for ID '%s'", key)
 				continue
+			}
+			var ttl int
+			if len(parts) == 5 {
+				ttl, err = strconv.Atoi(parts[1])
 			}
 
 			// Populate the LocalData struct
 			localData = LocalData{
 				Id:     id,
 				Domain: strings.Trim(parts[0], `"`), // Remove surrounding `"`,
-				Type:   parts[2],
-				Value:  strings.Trim(parts[3], `"`),
+				Ttl:    ttl,
+				Type:   parts[len(parts)-2],
+				Value:  strings.Trim(parts[len(parts)-1], `"`),
 			}
 
 			// Since we only need the first item, return immediately
