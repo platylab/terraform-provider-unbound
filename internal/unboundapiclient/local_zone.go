@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-// GetLocalZone - Returns specific local zone
+// GetLocalZone - Returns specific local zone.
 func (c *ClientWithResponses) GetLocalZone(ctx context.Context, valueId int) (LocalZone, error) {
 	// Parameters
 	clause := "server"
@@ -49,7 +49,7 @@ func (c *ClientWithResponses) GetLocalZone(ctx context.Context, valueId int) (Lo
 	// Check for the "items" field
 	items, ok := responseMap["items"].(map[string]interface{})
 	if !ok || len(items) == 0 {
-		return LocalZone{}, fmt.Errorf("No items found in the response")
+		return LocalZone{}, fmt.Errorf("no items found in the response")
 	}
 
 	// Directly extract the first "item" into a LocalZone struct
@@ -89,11 +89,11 @@ func (c *ClientWithResponses) GetLocalZone(ctx context.Context, valueId int) (Lo
 	}
 
 	// If no valid items were found (loop completed without returning)
-	return LocalZone{}, fmt.Errorf("Failed to parse any valid items in the response")
+	return LocalZone{}, fmt.Errorf("failed to parse any valid items in the response")
 
 }
 
-// CreateLocalZone - Returns specific local zone
+// CreateLocalZone - Returns specific local zone.
 func (c *ClientWithResponses) CreateLocalZone(ctx context.Context, body PostConfigClauseAttributeValueIdJSONRequestBody) (LocalZone, error) {
 	// Parameters
 	clause := "server"
@@ -133,7 +133,7 @@ func (c *ClientWithResponses) CreateLocalZone(ctx context.Context, body PostConf
 	// Check for the "items" field
 	items, ok := responseMap["items"].(map[string]interface{})
 	if !ok || len(items) == 0 {
-		return LocalZone{}, fmt.Errorf("No items found in the response")
+		return LocalZone{}, fmt.Errorf("no items found in the response")
 	}
 
 	// Directly extract the first "item" into a LocalZone struct
@@ -173,11 +173,11 @@ func (c *ClientWithResponses) CreateLocalZone(ctx context.Context, body PostConf
 	}
 
 	// If no valid items were found (loop completed without returning)
-	return LocalZone{}, fmt.Errorf("Failed to parse any valid items in the response")
+	return LocalZone{}, fmt.Errorf("failed to parse any valid items in the response")
 
 }
 
-// UpdateLocalZone - Returns specific local zone
+// UpdateLocalZone - Returns specific local zone.
 func (c *ClientWithResponses) UpdateLocalZone(ctx context.Context, valueId int, body PutConfigClauseAttributeValueIdJSONRequestBody) (LocalZone, error) {
 	// Parameters
 	clause := "server"
@@ -216,7 +216,7 @@ func (c *ClientWithResponses) UpdateLocalZone(ctx context.Context, valueId int, 
 	// Check for the "items" field
 	items, ok := responseMap["items"].(map[string]interface{})
 	if !ok || len(items) == 0 {
-		return LocalZone{}, fmt.Errorf("No items found in the response")
+		return LocalZone{}, fmt.Errorf("no items found in the response")
 	}
 
 	// Directly extract the first "item" into a LocalZone struct
@@ -230,9 +230,18 @@ func (c *ClientWithResponses) UpdateLocalZone(ctx context.Context, valueId int, 
 			}
 
 			// Extract the ID field
-			id, err := strconv.Atoi(itemMap["id"].(string))
-			if err != nil {
-				return localZone, fmt.Errorf("failed to convert ID '%s' to integer: %v", key, err)
+			var id int
+			switch v := itemMap["id"].(type) {
+			case string:
+				var err error
+				id, err = strconv.Atoi(v)
+				if err != nil {
+					return localZone, fmt.Errorf("failed to convert ID '%s' to integer: %v", key, err)
+				}
+			case float64:
+				id = int(v)
+			default:
+				return localZone, fmt.Errorf("id for item '%s' has unexpected type %T", key, v)
 			}
 
 			// Extract the "new_value" field
@@ -261,11 +270,11 @@ func (c *ClientWithResponses) UpdateLocalZone(ctx context.Context, valueId int, 
 	}
 
 	// If no valid items were found (loop completed without returning)
-	return LocalZone{}, fmt.Errorf("Failed to parse any valid items in the response")
+	return LocalZone{}, fmt.Errorf("failed to parse any valid items in the response")
 
 }
 
-// DeleteLocalZone - Returns specific local zone
+// DeleteLocalZone - Returns specific local zone.
 func (c *ClientWithResponses) DeleteLocalZone(ctx context.Context, valueId int) (LocalZone, error) {
 	// Parameters
 	clause := "server"
@@ -304,7 +313,7 @@ func (c *ClientWithResponses) DeleteLocalZone(ctx context.Context, valueId int) 
 	// Check for the "items" field
 	items, ok := responseMap["items"].(map[string]interface{})
 	if !ok || len(items) == 0 {
-		return LocalZone{}, fmt.Errorf("No items found in the response")
+		return LocalZone{}, fmt.Errorf("no items found in the response")
 	}
 
 	// Directly extract the first "item" into a LocalZone struct
@@ -318,9 +327,18 @@ func (c *ClientWithResponses) DeleteLocalZone(ctx context.Context, valueId int) 
 			}
 
 			// Extract the ID field
-			id, err := strconv.Atoi(itemMap["id"].(string))
-			if err != nil {
-				return localZone, fmt.Errorf("failed to convert ID '%s' to integer: %v", key, err)
+			var id int
+			switch v := itemMap["id"].(type) {
+			case string:
+				var err error
+				id, err = strconv.Atoi(v)
+				if err != nil {
+					return localZone, fmt.Errorf("failed to convert ID '%s' to integer: %v", key, err)
+				}
+			case float64:
+				id = int(v)
+			default:
+				return localZone, fmt.Errorf("id for item '%s' has unexpected type %T", key, v)
 			}
 
 			// Extract the "old_value" field
@@ -349,6 +367,6 @@ func (c *ClientWithResponses) DeleteLocalZone(ctx context.Context, valueId int) 
 	}
 
 	// If no valid items were found (loop completed without returning)
-	return LocalZone{}, fmt.Errorf("Failed to parse any valid items in the response")
+	return LocalZone{}, fmt.Errorf("failed to parse any valid items in the response")
 
 }

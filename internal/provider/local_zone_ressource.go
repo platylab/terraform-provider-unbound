@@ -250,7 +250,7 @@ func (r *local_zoneResource) Delete(ctx context.Context, req resource.DeleteRequ
 
 }
 
-// ImportState imports an existing ressource into the state
+// ImportState imports an existing ressource into the state.
 func (r *local_zoneResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)

@@ -1,13 +1,13 @@
 package unboundapiclient
 
-// LocalZone -
+// LocalZone struct.
 type LocalZone struct {
 	Id   int    `json:"id"`
 	Name string `json:"name"`
 	Type string `json:"type"`
 }
 
-// LocalData -
+// LocalData struct.
 type LocalData struct {
 	Id     int    `json:"id"`
 	Domain string `json:"domain"`

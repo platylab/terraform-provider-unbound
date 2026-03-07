@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-// GetLocalData - Returns specific local data
+// GetLocalData - Returns specific local data.
 func (c *ClientWithResponses) GetLocalData(ctx context.Context, valueId int) (LocalData, error) {
 	// Parameters
 	clause := "server"
@@ -49,7 +49,7 @@ func (c *ClientWithResponses) GetLocalData(ctx context.Context, valueId int) (Lo
 	// Check for the "items" field
 	items, ok := responseMap["items"].(map[string]interface{})
 	if !ok || len(items) == 0 {
-		return LocalData{}, fmt.Errorf("No items found in the response")
+		return LocalData{}, fmt.Errorf("no items found in the response")
 	}
 
 	// Directly extract the first "item" into a LocalData struct
@@ -79,6 +79,9 @@ func (c *ClientWithResponses) GetLocalData(ctx context.Context, valueId int) (Lo
 			var ttl int
 			if len(parts) == 5 {
 				ttl, err = strconv.Atoi(parts[1])
+				if err != nil {
+					log.Printf("Failed to parse TTL '%s' for ID '%s': %v", parts[1], key, err)
+				}
 			}
 
 			// Populate the LocalData struct
@@ -95,11 +98,11 @@ func (c *ClientWithResponses) GetLocalData(ctx context.Context, valueId int) (Lo
 	}
 
 	// If no valid items were found (loop completed without returning)
-	return LocalData{}, fmt.Errorf("Failed to parse any valid items in the response")
+	return LocalData{}, fmt.Errorf("failed to parse any valid items in the response")
 
 }
 
-// CreateLocalData - Returns specific local data
+// CreateLocalData - Returns specific local data.
 func (c *ClientWithResponses) CreateLocalData(ctx context.Context, body PostConfigClauseAttributeValueIdJSONRequestBody) (LocalData, error) {
 	// Parameters
 	clause := "server"
@@ -139,7 +142,7 @@ func (c *ClientWithResponses) CreateLocalData(ctx context.Context, body PostConf
 	// Check for the "items" field
 	items, ok := responseMap["items"].(map[string]interface{})
 	if !ok || len(items) == 0 {
-		return LocalData{}, fmt.Errorf("No items found in the response")
+		return LocalData{}, fmt.Errorf("no items found in the response")
 	}
 
 	// Directly extract the first "item" into a LocalData struct
@@ -169,6 +172,9 @@ func (c *ClientWithResponses) CreateLocalData(ctx context.Context, body PostConf
 			var ttl int
 			if len(parts) == 5 {
 				ttl, err = strconv.Atoi(parts[1])
+				if err != nil {
+					log.Printf("Failed to parse TTL '%s' for ID '%s': %v", parts[1], key, err)
+				}
 			}
 
 			// Populate the LocalData struct
@@ -185,11 +191,11 @@ func (c *ClientWithResponses) CreateLocalData(ctx context.Context, body PostConf
 	}
 
 	// If no valid items were found (loop completed without returning)
-	return LocalData{}, fmt.Errorf("Failed to parse any valid items in the response")
+	return LocalData{}, fmt.Errorf("failed to parse any valid items in the response")
 
 }
 
-// UpdateLocalData - Returns specific local data
+// UpdateLocalData - Returns specific local data.
 func (c *ClientWithResponses) UpdateLocalData(ctx context.Context, valueId int, body PutConfigClauseAttributeValueIdJSONRequestBody) (LocalData, error) {
 	// Parameters
 	clause := "server"
@@ -228,7 +234,7 @@ func (c *ClientWithResponses) UpdateLocalData(ctx context.Context, valueId int, 
 	// Check for the "items" field
 	items, ok := responseMap["items"].(map[string]interface{})
 	if !ok || len(items) == 0 {
-		return LocalData{}, fmt.Errorf("No items found in the response")
+		return LocalData{}, fmt.Errorf("no items found in the response")
 	}
 
 	// Directly extract the first "item" into a LocalData struct
@@ -242,9 +248,18 @@ func (c *ClientWithResponses) UpdateLocalData(ctx context.Context, valueId int, 
 			}
 
 			// Extract the ID field
-			id, err := strconv.Atoi(itemMap["id"].(string))
-			if err != nil {
-				return localData, fmt.Errorf("failed to convert ID '%s' to integer: %v", key, err)
+			var id int
+			switch v := itemMap["id"].(type) {
+			case string:
+				var err error
+				id, err = strconv.Atoi(v)
+				if err != nil {
+					return localData, fmt.Errorf("failed to convert ID '%s' to integer: %v", key, err)
+				}
+			case float64:
+				id = int(v)
+			default:
+				return localData, fmt.Errorf("id for item '%s' has unexpected type %T", key, v)
 			}
 
 			// Extract the "new_value" field
@@ -262,6 +277,9 @@ func (c *ClientWithResponses) UpdateLocalData(ctx context.Context, valueId int, 
 			var ttl int
 			if len(parts) == 5 {
 				ttl, err = strconv.Atoi(parts[1])
+				if err != nil {
+					log.Printf("Failed to parse TTL '%s' for ID '%s': %v", parts[1], key, err)
+				}
 			}
 
 			// Populate the LocalData struct
@@ -279,11 +297,11 @@ func (c *ClientWithResponses) UpdateLocalData(ctx context.Context, valueId int, 
 	}
 
 	// If no valid items were found (loop completed without returning)
-	return LocalData{}, fmt.Errorf("Failed to parse any valid items in the response")
+	return LocalData{}, fmt.Errorf("failed to parse any valid items in the response")
 
 }
 
-// DeleteLocalData - Returns specific local data
+// DeleteLocalData - Returns specific local data.
 func (c *ClientWithResponses) DeleteLocalData(ctx context.Context, valueId int) (LocalData, error) {
 	// Parameters
 	clause := "server"
@@ -322,7 +340,7 @@ func (c *ClientWithResponses) DeleteLocalData(ctx context.Context, valueId int) 
 	// Check for the "items" field
 	items, ok := responseMap["items"].(map[string]interface{})
 	if !ok || len(items) == 0 {
-		return LocalData{}, fmt.Errorf("No items found in the response")
+		return LocalData{}, fmt.Errorf("no items found in the response")
 	}
 
 	// Directly extract the first "item" into a LocalData struct
@@ -336,9 +354,18 @@ func (c *ClientWithResponses) DeleteLocalData(ctx context.Context, valueId int) 
 			}
 
 			// Extract the ID field
-			id, err := strconv.Atoi(itemMap["id"].(string))
-			if err != nil {
-				return localData, fmt.Errorf("failed to convert ID '%s' to integer: %v", key, err)
+			var id int
+			switch v := itemMap["id"].(type) {
+			case string:
+				var err error
+				id, err = strconv.Atoi(v)
+				if err != nil {
+					return localData, fmt.Errorf("failed to convert ID '%s' to integer: %v", key, err)
+				}
+			case float64:
+				id = int(v)
+			default:
+				return localData, fmt.Errorf("id for item '%s' has unexpected type %T", key, v)
 			}
 
 			// Extract the "old_value" field
@@ -356,6 +383,9 @@ func (c *ClientWithResponses) DeleteLocalData(ctx context.Context, valueId int) 
 			var ttl int
 			if len(parts) == 5 {
 				ttl, err = strconv.Atoi(parts[1])
+				if err != nil {
+					log.Printf("Failed to parse TTL '%s' for ID '%s': %v", parts[1], key, err)
+				}
 			}
 
 			// Populate the LocalData struct
@@ -373,6 +403,6 @@ func (c *ClientWithResponses) DeleteLocalData(ctx context.Context, valueId int) 
 	}
 
 	// If no valid items were found (loop completed without returning)
-	return LocalData{}, fmt.Errorf("Failed to parse any valid items in the response")
+	return LocalData{}, fmt.Errorf("failed to parse any valid items in the response")
 
 }

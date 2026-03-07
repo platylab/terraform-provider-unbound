@@ -21,7 +21,7 @@ var (
 	_ provider.Provider = &unboundProvider{}
 )
 
-// Global Mutex
+// Global Mutex.
 var mutex sync.Mutex
 
 // New is a helper function to simplify provider server and testing implementation.

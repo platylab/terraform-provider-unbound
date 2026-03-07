@@ -6,13 +6,13 @@ import (
 	"net/http"
 )
 
-// AuthenticatedClient wraps the generated client with authentication functionality
+// AuthenticatedClient wraps the generated client with authentication functionality.
 type AuthenticatedClient struct {
 	*ClientWithResponses
 	username string
 }
 
-// NewAuthenticatedClient creates a new authenticated client
+// NewAuthenticatedClient creates a new authenticated client.
 func NewAuthenticatedClient(server string, username, password string) (*AuthenticatedClient, error) {
 	// Create the base client
 	client, err := NewClientWithResponses(server)
@@ -42,7 +42,11 @@ func NewAuthenticatedClient(server string, username, password string) (*Authenti
 
 	// Create request editor to add Authorization header
 	token := *resp.JSON200.AccessToken
-	client.ClientInterface.(*Client).RequestEditors = append(client.ClientInterface.(*Client).RequestEditors, func(ctx context.Context, req *http.Request) error {
+	c, ok := client.ClientInterface.(*Client)
+	if !ok {
+		return nil, fmt.Errorf("unexpected client type: %T", client.ClientInterface)
+	}
+	c.RequestEditors = append(c.RequestEditors, func(ctx context.Context, req *http.Request) error {
 		req.Header.Set("Authorization", "Bearer "+token)
 		return nil
 	})
@@ -53,7 +57,7 @@ func NewAuthenticatedClient(server string, username, password string) (*Authenti
 	}, nil
 }
 
-// GetUsername returns the authenticated username
+// GetUsername returns the authenticated username.
 func (ac *AuthenticatedClient) GetUsername() string {
 	return ac.username
 }
