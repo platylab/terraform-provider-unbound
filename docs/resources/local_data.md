@@ -29,6 +29,10 @@ resource "unbound_local_data" "tofu_example_eu" {
 - `type` (String) Type of the entry
 - `value` (String) Value of the entry
 
+### Optional
+
+- `ttl` (Number) TTL of the entry. Defaults to the Unbound server parameter
+
 ### Read-Only
 
 - `id` (Number) ID of the entry

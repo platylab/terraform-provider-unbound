@@ -28,5 +28,6 @@ data "unbound_local_data" "test_example_com" {
 ### Read-Only
 
 - `domain` (String) Domain of the entry
+- `ttl` (Number) TTL of the entry
 - `type` (String) Type of the entry
 - `value` (String) Value of the entry
